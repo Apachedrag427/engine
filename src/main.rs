@@ -11,7 +11,7 @@ fn main() {
 	let middle_x = width as f64 / 2.;
 	let middle_y = height as f64 / 2.;
 
-	let mut renderer = renderers::stdout_color_ansi_renderer::StdoutColorAnsiRenderer;
+	let mut renderer = renderers::stdout_color_ansi::StdoutColorAnsiRenderer;
 	renderer.begin_rendering();
 
 	loop {

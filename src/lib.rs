@@ -215,6 +215,10 @@ impl Frame {
 		}
 	}
 
+	pub fn get_dimensions(&self) -> (usize, usize) {
+		(self.width, self.height)
+	}
+
 	pub fn get_pixel(&self, x: usize, y: usize) -> Option<&Color3> {
 		self.data.get(y * self.width + x)
 	}
