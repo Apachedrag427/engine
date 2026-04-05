@@ -5,13 +5,13 @@ pub mod renderers;
 use renderers::Renderer;
 
 fn main() {
-	let width = 100;
-	let height = 100;
+	let width = 800;
+	let height = 800;
 
 	let middle_x = width as f64 / 2.;
 	let middle_y = height as f64 / 2.;
 
-	let mut renderer = renderers::stdout_color_ansi::StdoutColorAnsiRenderer;
+	let mut renderer = renderers::kitty_graphics::SHMRenderer;
 	renderer.begin_rendering();
 
 	loop {
@@ -26,29 +26,41 @@ fn main() {
 
 		frame.clear(bg_color);
 
+		let arrow_length = 300.;
+		let arrow_leaf_length = 50.;
+		let arrow_leaf_offset = 0.5;
+
 		let arrow_color = bg_color.invert(); //Color3::new(f64::sin(time) * 0.5 + 0.5, f64::cos(time) * 0.5 + 0.5, 1.);
 
 		let arrow_point = Vector2::new(
-			middle_x + f64::cos(time) * 40.,
-			middle_y + f64::sin(time) * 40.,
+			middle_x + f64::cos(time) * arrow_length,
+			middle_y + f64::sin(time) * arrow_length,
 		);
 
 		frame.draw_line(Vector2::new(middle_x, middle_y), arrow_point, arrow_color);
 		frame.draw_line(
 			arrow_point,
 			Vector2::new(
-				arrow_point.x - 7. * f64::cos(time + 0.5),
-				arrow_point.y - 7. * f64::sin(time + 0.5),
+				arrow_point.x - arrow_leaf_length * f64::cos(time + arrow_leaf_offset),
+				arrow_point.y - arrow_leaf_length * f64::sin(time + arrow_leaf_offset),
 			),
 			arrow_color,
 		);
 		frame.draw_line(
 			arrow_point,
 			Vector2::new(
-				arrow_point.x - 7. * f64::cos(time - 0.5),
-				arrow_point.y - 7. * f64::sin(time - 0.5),
+				arrow_point.x - arrow_leaf_length * f64::cos(time - arrow_leaf_offset),
+				arrow_point.y - arrow_leaf_length * f64::sin(time - arrow_leaf_offset),
 			),
 			arrow_color,
+		);
+
+		frame.fill_rect(
+			rasterizer::Rect {
+				position: Vector2::new(150., 150.),
+				dimensions: Vector2::new(100., 1.),
+			},
+			Color3::black(),
 		);
 
 		renderer.prepare_for_next_frame(&frame);
