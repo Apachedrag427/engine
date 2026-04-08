@@ -1,13 +1,13 @@
 use super::Frame;
-use crate::types::Color3;
+use crate::types::Color;
 
 pub enum FrameItem {
-	Pixel(usize, usize, Color3),
+	Pixel(usize, usize, Color),
 	LineEnd,
 }
 
 pub struct FrameIter {
-	data: Vec<Color3>,
+	data: Vec<Color>,
 
 	// Height is unnecessary because `Vec.get` will catch it if it goes down too many rows.
 	width: usize,

@@ -1,50 +1,68 @@
+use super::Lerp;
 use std::ops::{Div, Mul};
 
 #[derive(Debug, Clone, Copy)]
-pub struct Color3 {
+pub struct Color {
 	pub r: f64,
 	pub g: f64,
 	pub b: f64,
+	pub a: f64,
 }
-impl Color3 {
+impl Color {
 	#[inline]
-	pub fn new(r: f64, g: f64, b: f64) -> Color3 {
-		Color3 { r, g, b }
+	pub fn new(r: f64, g: f64, b: f64) -> Color {
+		Color { r, g, b, a: 1. }
 	}
 
 	#[inline]
-	pub fn white() -> Color3 {
-		Color3::new(1., 1., 1.)
-	}
-	#[inline]
-	pub fn black() -> Color3 {
-		Color3::new(0., 0., 0.)
-	}
-	#[inline]
-	pub fn red() -> Color3 {
-		Color3::new(1., 0., 0.)
-	}
-	#[inline]
-	pub fn green() -> Color3 {
-		Color3::new(0., 1., 0.)
-	}
-	#[inline]
-	pub fn blue() -> Color3 {
-		Color3::new(0., 0., 1.)
+	pub fn rgba(r: f64, g: f64, b: f64, a: f64) -> Color {
+		Color { r, g, b, a }
 	}
 
 	#[inline]
-	pub fn invert(&self) -> Color3 {
-		Color3 {
+	pub fn white() -> Color {
+		Color::new(1., 1., 1.)
+	}
+	#[inline]
+	pub fn black() -> Color {
+		Color::new(0., 0., 0.)
+	}
+	#[inline]
+	pub fn red() -> Color {
+		Color::new(1., 0., 0.)
+	}
+	#[inline]
+	pub fn green() -> Color {
+		Color::new(0., 1., 0.)
+	}
+	#[inline]
+	pub fn blue() -> Color {
+		Color::new(0., 0., 1.)
+	}
+
+	#[inline]
+	pub fn transparent() -> Color {
+		Color::rgba(0., 0., 0., 0.)
+	}
+
+	#[inline]
+	pub fn invert(&self) -> Color {
+		Color {
 			r: 1. - self.r,
 			g: 1. - self.g,
 			b: 1. - self.b,
+			a: self.a,
 		}
 	}
 
 	#[inline]
-	pub fn from_value(n: f64) -> Color3 {
-		Color3 { r: n, g: n, b: n }
+	pub fn from_value(n: f64) -> Color {
+		Color {
+			r: n,
+			g: n,
+			b: n,
+			a: 1.,
+		}
 	}
 
 	#[inline]
@@ -53,28 +71,41 @@ impl Color3 {
 	}
 }
 
-impl Mul<f64> for Color3 {
-	type Output = Color3;
+impl Lerp<Color> for Color {
+	type Output = Color;
+	fn lerp(&self, rhs: Color, a: f64) -> Self::Output {
+		Self {
+			r: self.r.lerp(rhs.r, a),
+			g: self.g.lerp(rhs.g, a),
+			b: self.b.lerp(rhs.b, a),
+			a: self.a.lerp(rhs.a, a),
+		}
+	}
+}
+
+impl Mul<f64> for Color {
+	type Output = Color;
 
 	fn mul(self, rhs: f64) -> Self::Output {
-		Color3::new(self.r * rhs, self.g * rhs, self.b * rhs)
+		Color::new(self.r * rhs, self.g * rhs, self.b * rhs)
 	}
 }
 
-impl Div<f64> for Color3 {
-	type Output = Color3;
+impl Div<f64> for Color {
+	type Output = Color;
 
 	fn div(self, rhs: f64) -> Self::Output {
-		Color3::new(self.r / rhs, self.g / rhs, self.b / rhs)
+		Color::new(self.r / rhs, self.g / rhs, self.b / rhs)
 	}
 }
 
-impl Default for Color3 {
+impl Default for Color {
 	fn default() -> Self {
-		Color3 {
+		Color {
 			r: 0.,
 			g: 0.,
 			b: 0.,
+			a: 0.,
 		}
 	}
 }

@@ -1,15 +1,22 @@
 use crate::types::vector::*;
 
-#[derive(Debug)]
-pub struct Triangle2d {
-	pub point1: Vector2,
-	pub point2: Vector2,
-	pub point3: Vector2,
+#[derive(Debug, Clone, Copy)]
+pub struct Triangle2d(pub Vector2, pub Vector2, pub Vector2);
+
+#[derive(Debug, Clone, Copy)]
+pub struct CoordinateTriangle2d(pub Coordinate2d, pub Coordinate2d, pub Coordinate2d);
+
+impl Into<CoordinateTriangle2d> for Triangle2d {
+	fn into(self) -> CoordinateTriangle2d {
+		CoordinateTriangle2d(self.0.into(), self.1.into(), self.2.into())
+	}
 }
 
-#[derive(Debug)]
-pub struct Triangle3d {
-	pub point1: Vector3,
-	pub point2: Vector3,
-	pub point3: Vector3,
+impl Into<Triangle2d> for CoordinateTriangle2d {
+	fn into(self) -> Triangle2d {
+		Triangle2d(self.0.into(), self.1.into(), self.2.into())
+	}
 }
+
+#[derive(Debug, Clone, Copy)]
+pub struct Triangle3d(pub Vector3, pub Vector3, pub Vector3);

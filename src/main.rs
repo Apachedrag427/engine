@@ -1,5 +1,5 @@
 use rasterizer::frame::Frame;
-use rasterizer::types::{Color3, Rect, Vector2};
+use rasterizer::types::{Color, Coordinate2d, Triangle2d, Vector2};
 
 use rasterizer::render;
 use rasterizer::render::RenderBackend;
@@ -19,49 +19,70 @@ fn main() {
 			.duration_since(std::time::UNIX_EPOCH)
 			.unwrap()
 			.as_secs_f64();
+
 		let mut frame = Frame::new(width, height);
 
-		let bg_color =
-			Color3::new(f64::cos(time) * 0.5 + 0.5, f64::sin(time) * 0.5 + 0.5, 0.) * 0.65;
+		let mut mini_frame = Frame::new(100, 100);
+		mini_frame.callback_fill(|x, y| {
+			if (y + x) / 8 % 2 == 0 {
+				Color::white()
+			} else {
+				Color::transparent()
+			}
+		});
 
-		frame.clear(bg_color);
+		// let bg_color =
+		// 	Color3::new(f64::cos(time) * 0.5 + 0.5, f64::sin(time) * 0.5 + 0.5, 0.) * 0.65;
 
-		let arrow_length = 300.;
-		let arrow_leaf_length = 50.;
-		let arrow_leaf_offset = 0.5;
+		frame.clear(Color::red());
+		frame.draw_frame_int(Coordinate2d::one(), mini_frame);
 
-		let arrow_color = bg_color.invert(); //Color3::new(f64::sin(time) * 0.5 + 0.5, f64::cos(time) * 0.5 + 0.5, 1.);
-
-		let arrow_point = Vector2::new(
-			middle_x + f64::cos(time) * arrow_length,
-			middle_y + f64::sin(time) * arrow_length,
+		let tri = Triangle2d(
+			Vector2::new(middle_x, middle_y),
+			Vector2::new(middle_x + f64::cos(time) * 100., middle_y),
+			Vector2::new(middle_x, middle_y + f64::sin(time) * 100.),
 		);
 
-		frame.draw_line(Vector2::new(middle_x, middle_y), arrow_point, arrow_color);
-		frame.draw_line(
-			arrow_point,
-			Vector2::new(
-				arrow_point.x - arrow_leaf_length * f64::cos(time + arrow_leaf_offset),
-				arrow_point.y - arrow_leaf_length * f64::sin(time + arrow_leaf_offset),
-			),
-			arrow_color,
-		);
-		frame.draw_line(
-			arrow_point,
-			Vector2::new(
-				arrow_point.x - arrow_leaf_length * f64::cos(time - arrow_leaf_offset),
-				arrow_point.y - arrow_leaf_length * f64::sin(time - arrow_leaf_offset),
-			),
-			arrow_color,
-		);
+		frame.draw_tri(tri, Color::green());
 
-		frame.fill_rect(
-			Rect {
-				position: Vector2::new(150., 150.),
-				dimensions: Vector2::new(100., 1.),
-			},
-			Color3::black(),
-		);
+		frame.draw_wireframe_tri(tri, Color::red());
+
+		// let arrow_length = 300.;
+		// let arrow_leaf_length = 50.;
+		// let arrow_leaf_offset = 0.5;
+
+		// let arrow_color = bg_color.invert();
+
+		// let arrow_point = Vector2::new(
+		// 	middle_x + f64::cos(time) * arrow_length,
+		// 	middle_y + f64::sin(time) * arrow_length,
+		// );
+
+		// frame.draw_line(Vector2::new(middle_x, middle_y), arrow_point, arrow_color);
+		// frame.draw_line(
+		// 	arrow_point,
+		// 	Vector2::new(
+		// 		arrow_point.x - arrow_leaf_length * f64::cos(time + arrow_leaf_offset),
+		// 		arrow_point.y - arrow_leaf_length * f64::sin(time + arrow_leaf_offset),
+		// 	),
+		// 	arrow_color,
+		// );
+		// frame.draw_line(
+		// 	arrow_point,
+		// 	Vector2::new(
+		// 		arrow_point.x - arrow_leaf_length * f64::cos(time - arrow_leaf_offset),
+		// 		arrow_point.y - arrow_leaf_length * f64::sin(time - arrow_leaf_offset),
+		// 	),
+		// 	arrow_color,
+		// );
+
+		// frame.fill_rect(
+		// 	Rect {
+		// 		position: Vector2::new(150., 150.),
+		// 		dimensions: Vector2::new(100., 1.),
+		// 	},
+		// 	Color3::black(),
+		// );
 
 		renderer.prepare_for_next_frame(&frame);
 		renderer.render_frame(frame);

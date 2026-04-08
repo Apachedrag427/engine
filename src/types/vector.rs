@@ -1,3 +1,4 @@
+use super::Lerp;
 use std::ops::Add;
 
 #[derive(Debug, Clone, Copy)]
@@ -37,6 +38,31 @@ impl Vector2 {
 	#[inline]
 	pub fn dot(&self, rhs: Vector2) -> f64 {
 		(self.x * rhs.x) + (self.y * rhs.y)
+	}
+
+	#[inline]
+	pub fn cross2d(&self, rhs: Vector2) -> f64 {
+		self.x * rhs.y - rhs.x * self.y
+	}
+}
+
+impl Lerp<Vector2> for Vector2 {
+	type Output = Vector2;
+	fn lerp(&self, rhs: Vector2, a: f64) -> Self::Output {
+		Vector2 {
+			x: self.x.lerp(rhs.x, a),
+			y: self.y.lerp(rhs.y, a),
+		}
+	}
+}
+
+impl Lerp<Coordinate2d> for Vector2 {
+	type Output = Vector2;
+	fn lerp(&self, rhs: Coordinate2d, a: f64) -> Self::Output {
+		Vector2 {
+			x: self.x.lerp(rhs.x, a),
+			y: self.y.lerp(rhs.y, a),
+		}
 	}
 }
 
@@ -106,6 +132,26 @@ impl Coordinate2d {
 	#[inline]
 	pub fn one() -> Coordinate2d {
 		Coordinate2d::new(1, 1)
+	}
+}
+
+impl Lerp<Coordinate2d> for Coordinate2d {
+	type Output = Coordinate2d;
+	fn lerp(&self, rhs: Coordinate2d, a: f64) -> Self::Output {
+		Coordinate2d {
+			x: self.x.lerp(rhs.x, a),
+			y: self.y.lerp(rhs.y, a),
+		}
+	}
+}
+
+impl Lerp<Vector2> for Coordinate2d {
+	type Output = Coordinate2d;
+	fn lerp(&self, rhs: Vector2, a: f64) -> Self::Output {
+		Coordinate2d {
+			x: self.x.lerp(rhs.x, a),
+			y: self.y.lerp(rhs.y, a),
+		}
 	}
 }
 

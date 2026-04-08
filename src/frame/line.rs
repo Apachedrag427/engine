@@ -1,29 +1,25 @@
 use super::Frame;
-use crate::types::{Color3, Coordinate2d, CoordinateRect, Vector2};
+use crate::types::{Color, Coordinate2d, CoordinateRect, Vector2};
 
 impl Frame {
 	// Explanation of Bresenham's Line Algorithm: https://www.youtube.com/watch?v=CceepU1vIKo
-	pub fn draw_line(&mut self, start: Vector2, end: Vector2, color: Color3) {
+	pub fn draw_line(&mut self, start: Vector2, end: Vector2, color: Color) {
+		self.draw_line_int(start.into(), end.into(), color);
+	}
+
+	pub fn draw_line_int(&mut self, start: Coordinate2d, end: Coordinate2d, color: Color) {
 		if (end.x - start.x).abs() > (end.y - start.y).abs() {
-			self.draw_line_horizontal_int(start.into(), end.into(), color);
+			self.draw_horizontal_line(start, end, color);
 		} else {
-			self.draw_line_vertical_int(start.into(), end.into(), color);
+			self.draw_vertical_line(start, end, color);
 		}
 	}
 
-	pub fn draw_line_int(&mut self, start: Coordinate2d, end: Coordinate2d, color: Color3) {
-		if (end.x - start.x).abs() > (end.y - start.y).abs() {
-			self.draw_line_horizontal_int(start, end, color);
-		} else {
-			self.draw_line_vertical_int(start, end, color);
-		}
-	}
-
-	fn draw_line_horizontal_int(
+	fn draw_horizontal_line(
 		&mut self,
 		mut start: Coordinate2d,
 		mut end: Coordinate2d,
-		color: Color3,
+		color: Color,
 	) {
 		if start.x > end.x {
 			(start.x, end.x) = (end.x, start.x);
@@ -38,6 +34,7 @@ impl Frame {
 				},
 				color,
 			);
+			return;
 		}
 
 		let dx = end.x - start.x;
@@ -60,12 +57,7 @@ impl Frame {
 		}
 	}
 
-	fn draw_line_vertical_int(
-		&mut self,
-		mut start: Coordinate2d,
-		mut end: Coordinate2d,
-		color: Color3,
-	) {
+	fn draw_vertical_line(&mut self, mut start: Coordinate2d, mut end: Coordinate2d, color: Color) {
 		if start.y > end.y {
 			(start.x, end.x) = (end.x, start.x);
 			(start.y, end.y) = (end.y, start.y);
@@ -79,6 +71,7 @@ impl Frame {
 				},
 				color,
 			);
+			return;
 		}
 
 		let mut dx = end.x - start.x;

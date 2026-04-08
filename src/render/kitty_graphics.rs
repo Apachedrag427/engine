@@ -35,7 +35,7 @@ impl RenderBackend for KittySHMRenderer {
 
 	fn render_frame(&mut self, frame: Frame) {
 		let dim = frame.get_dimensions();
-		let size_bytes = 3 * dim.0 * dim.1;
+		let size_bytes = (3 * dim.x * dim.y) as usize;
 		// Initialize shared memory
 		let (fd, addr) = unsafe {
 			let null = std::ptr::null_mut();
@@ -73,8 +73,8 @@ impl RenderBackend for KittySHMRenderer {
 		// It's the terminal's job to close the shm.
 		print!(
 			"\x1b_Ga=T,f=24,t=s,s={},v={};{}\x1b\\",
-			dimensions.0,
-			dimensions.1,
+			dimensions.x,
+			dimensions.y,
 			general_purpose::STANDARD.encode(STORAGE_ID_STR)
 		);
 		std::io::Write::flush(&mut std::io::stdout()).unwrap();
@@ -121,8 +121,8 @@ impl RenderBackend for KittyEscapeRenderer {
 		}
 		print!(
 			"\x1b_Ga=T,f=24,s={},v={};{}\x1b\\",
-			dimensions.0,
-			dimensions.1,
+			dimensions.x,
+			dimensions.y,
 			general_purpose::STANDARD.encode(&data[..])
 		);
 		std::io::Write::flush(&mut std::io::stdout()).unwrap();
