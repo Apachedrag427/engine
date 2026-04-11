@@ -1,5 +1,5 @@
 use super::Lerp;
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vector2 {
@@ -42,7 +42,7 @@ impl Vector2 {
 
 	#[inline]
 	pub fn cross2d(&self, rhs: Vector2) -> f64 {
-		self.x * rhs.y - rhs.x * self.y
+		self.x * rhs.y - self.y * rhs.x
 	}
 }
 
@@ -70,6 +70,13 @@ impl Add<Vector2> for Vector2 {
 	type Output = Vector2;
 	fn add(self, rhs: Vector2) -> Self::Output {
 		Vector2::new(self.x + rhs.x, self.y + rhs.y)
+	}
+}
+
+impl Sub<Vector2> for Vector2 {
+	type Output = Vector2;
+	fn sub(self, rhs: Vector2) -> Self::Output {
+		Vector2::new(self.x - rhs.x, self.y - rhs.y)
 	}
 }
 
@@ -133,6 +140,14 @@ impl Coordinate2d {
 	pub fn one() -> Coordinate2d {
 		Coordinate2d::new(1, 1)
 	}
+	#[inline]
+	pub fn magnitude(&self) -> f64 {
+		((self.x * self.x + self.y * self.y) as f64).sqrt()
+	}
+	#[inline]
+	pub fn cross2d(&self, rhs: Coordinate2d) -> isize {
+		self.x * rhs.y - self.y * rhs.x
+	}
 }
 
 impl Lerp<Coordinate2d> for Coordinate2d {
@@ -159,6 +174,13 @@ impl Add<Coordinate2d> for Coordinate2d {
 	type Output = Coordinate2d;
 	fn add(self, rhs: Coordinate2d) -> Self::Output {
 		Coordinate2d::new(self.x + rhs.x, self.y + rhs.y)
+	}
+}
+
+impl Sub<Coordinate2d> for Coordinate2d {
+	type Output = Coordinate2d;
+	fn sub(self, rhs: Coordinate2d) -> Self::Output {
+		Coordinate2d::new(self.x - rhs.x, self.y - rhs.y)
 	}
 }
 

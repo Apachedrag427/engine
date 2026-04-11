@@ -18,7 +18,8 @@ fn main() {
 		let time = std::time::SystemTime::now()
 			.duration_since(std::time::UNIX_EPOCH)
 			.unwrap()
-			.as_secs_f64();
+			.as_secs_f64()
+			/ 2.;
 
 		let mut frame = Frame::new(width, height);
 
@@ -34,13 +35,16 @@ fn main() {
 		// let bg_color =
 		// 	Color3::new(f64::cos(time) * 0.5 + 0.5, f64::sin(time) * 0.5 + 0.5, 0.) * 0.65;
 
-		frame.clear(Color::red());
+		frame.clear(Color::black());
 		frame.draw_frame_int(Coordinate2d::one(), mini_frame);
 
 		let tri = Triangle2d(
-			Vector2::new(middle_x, middle_y),
-			Vector2::new(middle_x + f64::cos(time) * 100., middle_y),
-			Vector2::new(middle_x, middle_y + f64::sin(time) * 100.),
+			Vector2::new(
+				middle_x + f64::cos(time) * 30.,
+				middle_y + f64::sin(time) * 30.,
+			),
+			Vector2::new(middle_x + f64::cos(time) * 300., middle_y),
+			Vector2::new(middle_x, middle_y + f64::sin(time) * 300.),
 		);
 
 		frame.draw_tri(tri, Color::green());

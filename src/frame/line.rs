@@ -93,4 +93,55 @@ impl Frame {
 			}
 		}
 	}
+
+	pub fn draw_arrow(
+		&mut self,
+		start: Vector2,
+		end: Vector2,
+		chevron_length: f64,
+		chevron_angle: f64,
+		color: Color,
+	) {
+		self.draw_arrow_int(
+			start.into(),
+			end.into(),
+			chevron_length,
+			chevron_angle,
+			color,
+		);
+	}
+
+	// https://math.stackexchange.com/questions/1314006/drawing-an-arrow
+	pub fn draw_arrow_int(
+		&mut self,
+		start: Coordinate2d,
+		end: Coordinate2d,
+		chevron_length: f64,
+		chevron_angle: f64,
+		color: Color,
+	) {
+		let length = (end - start).magnitude();
+		let ratio = chevron_length / length;
+		self.draw_line_int(start, end, color);
+		let cos_chevron = f64::cos(chevron_angle);
+		let sin_chevron = f64::sin(chevron_angle);
+
+		let end_to_start: Vector2 = (start - end).into();
+		let xcos = end_to_start.x * cos_chevron;
+		let ycos = end_to_start.y * cos_chevron;
+		let xsin = end_to_start.x * sin_chevron;
+		let ysin = end_to_start.y * sin_chevron;
+
+		let chevron_1 = Coordinate2d::new(
+			end.x + (ratio * (xcos + ysin)) as isize,
+			end.y + (ratio * (ycos - xsin)) as isize,
+		);
+		let chevron_2 = Coordinate2d::new(
+			end.x + (ratio * (xcos - ysin)) as isize,
+			end.y + (ratio * (ycos + xsin)) as isize,
+		);
+
+		self.draw_line_int(end, chevron_1, color);
+		self.draw_line_int(end, chevron_2, color);
+	}
 }

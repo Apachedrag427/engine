@@ -1,5 +1,5 @@
 use super::Lerp;
-use std::ops::{Div, Mul};
+use std::ops::{Add, Div, Mul};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
@@ -80,6 +80,19 @@ impl Lerp<Color> for Color {
 			b: self.b.lerp(rhs.b, a),
 			a: self.a.lerp(rhs.a, a),
 		}
+	}
+}
+
+impl Add<Color> for Color {
+	type Output = Color;
+
+	fn add(self, rhs: Color) -> Self::Output {
+		Color::rgba(
+			self.r + rhs.r,
+			self.g + rhs.g,
+			self.b + rhs.b,
+			self.a + rhs.a,
+		)
 	}
 }
 

@@ -7,6 +7,10 @@ impl Frame {
 	}
 
 	pub fn fill_rect_int(&mut self, rect: CoordinateRect, color: Color) {
+		if rect.dimensions.x == 0 || rect.dimensions.y == 0 {
+			return;
+		}
+
 		let start = rect.position;
 		let mut end = rect.position + rect.dimensions;
 
@@ -47,18 +51,22 @@ impl Frame {
 		const THREAD_COUNT: usize = 8;
 		let width = self.width;
 		let height = self.height;
+		if width == 0 || height == 0 {
+			return;
+		}
 		let length = width * height;
 		let mut result: Vec<Color> = Vec::with_capacity(length);
 		let mut thread_handles = Vec::with_capacity(THREAD_COUNT);
+
+		let chunk_size = length as f64 / THREAD_COUNT as f64;
 		for thread_id in 0..THREAD_COUNT {
 			let inner_callback = callback.to_owned();
 			let thread = std::thread::spawn(move || {
-				let start_i = (thread_id as f64 * (length / THREAD_COUNT) as f64).ceil() as usize;
+				let start_i = (thread_id as f64 * chunk_size).ceil() as usize;
 				let mut y = start_i / width;
 				let mut x = start_i - (width * y);
 
-				let end_i =
-					((thread_id + 1) as f64 * (length / THREAD_COUNT) as f64).ceil() as usize;
+				let end_i = ((thread_id + 1) as f64 * chunk_size).ceil() as usize;
 
 				let mut chunk = Vec::with_capacity(end_i - start_i + 1);
 
@@ -90,24 +98,18 @@ impl Frame {
 		self.data = result;
 	}
 
-	pub fn callback_update<T: Fn(usize, usize, Color) -> Color>(&mut self, callback: T) {
-		// Same index rules as callback_fill
-		let mut i = 0;
-		for y in 0..self.height {
-			for x in 0..self.width {
-				self.set_pixel_i(i, callback(x, y, self.data[i]));
-				i += 1;
-			}
-		}
-	}
-
 	pub fn draw_frame(&mut self, position: Vector2, frame: Frame) {
 		self.draw_frame_int(position.into(), frame);
 	}
 
 	pub fn draw_frame_int(&mut self, position: Coordinate2d, frame: Frame) {
+		let dim = frame.get_dimensions();
+		if dim.x == 0 || dim.y == 0 {
+			return;
+		}
+
 		let start = position;
-		let mut end = position + frame.get_dimensions();
+		let mut end = position + dim;
 
 		// A scale of 1 means 0 offset.
 		end.x -= 1;
