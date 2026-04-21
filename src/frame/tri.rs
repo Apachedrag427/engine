@@ -21,6 +21,11 @@ impl Frame {
 	}
 
 	pub fn draw_tri_int(&mut self, tri: CoordinateTriangle2d, color: Color) {
+		let winding = tri.get_winding();
+		if winding == Winding::CCW {
+			return;
+		}
+
 		let mut bounds = tri.get_bounds_rect();
 		if bounds.position.x < 0 {
 			bounds.dimensions.x += bounds.position.x;
@@ -33,7 +38,6 @@ impl Frame {
 			bounds.dimensions.x.try_into().unwrap(),
 			bounds.dimensions.y.try_into().unwrap(),
 		);
-		let winding = tri.get_winding();
 		frame.callback_fill(move |x, y| {
 			let point = Coordinate2d::new(
 				bounds.position.x + x as isize,

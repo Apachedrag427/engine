@@ -100,3 +100,9 @@ impl Into<Triangle2d> for CoordinateTriangle2d {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Triangle3d(pub Vector3, pub Vector3, pub Vector3);
+
+impl Triangle3d {
+	pub fn get_centroid(&self) -> Vector3 {
+		(self.0 + self.1 + self.2) / 3.
+	}
+}

@@ -1,5 +1,6 @@
 use engine::frame::Frame;
-use engine::types::{Color, Coordinate2d, Triangle2d, Vector2};
+use engine::scene::{CameraProjection, Object, Scene};
+use engine::types::{Quat, RotationOrder, Vector2, Vector3};
 
 use std::num::NonZeroU32;
 use std::rc::Rc;
@@ -11,12 +12,21 @@ use winit::event_loop::{ActiveEventLoop, EventLoop, OwnedDisplayHandle};
 use winit::window::{Window, WindowId};
 
 fn main() {
+	let mut scene = Scene::new();
+
+	scene.camera.cframe = Vector3::new(0., 0., 5.).into();
+	scene.camera.projection = CameraProjection::Orthographic;
+
+	let pyramid = Object::pyramid();
+	scene.objects.push(pyramid);
+
 	let event_loop = EventLoop::new().unwrap();
 
 	let context = Context::new(event_loop.owned_display_handle()).unwrap();
 	let mut app = App {
 		context,
 		state: AppState::Initital,
+		scene,
 	};
 
 	event_loop.set_control_flow(winit::event_loop::ControlFlow::Poll);
@@ -26,6 +36,7 @@ fn main() {
 struct App {
 	context: Context<OwnedDisplayHandle>,
 	state: AppState,
+	scene: Scene,
 }
 
 enum AppState {
@@ -99,45 +110,22 @@ impl ApplicationHandler for App {
 				}
 			}
 			WindowEvent::RedrawRequested => {
-				let size = surface.window().inner_size();
-
-				let width = size.width as f64;
-				let height = size.height as f64;
-
-				let middle_x = width / 2.;
-				let middle_y = height / 2.;
-
 				let time = std::time::SystemTime::now()
 					.duration_since(std::time::UNIX_EPOCH)
 					.unwrap()
-					.as_secs_f64() / 2.;
+					.as_secs_f64();
+				let size = surface.window().inner_size();
+
+				self.scene.camera.screen_dimensions =
+					Vector2::new(size.width as f64, size.height as f64);
 
 				let mut frame = Frame::new(size.width as usize, size.height as usize);
 
-				let mut mini_frame = Frame::new(100, 100);
-				mini_frame.callback_fill(|x, y| {
-					if (y + x) / 8 % 2 == 0 {
-						Color::white()
-					} else {
-						Color::transparent()
-					}
-				});
+				self.scene.objects[0].cframe.rotation =
+					Quat::from_euler_angles(-0.3, time, 0., RotationOrder::YXZ);
+				self.scene.objects[0].cframe.position = Vector3::y_axis() * f64::sin(time) * 0.1;
 
-				frame.clear(Color::black());
-				frame.draw_frame_int(Coordinate2d::one(), mini_frame);
-
-				let tri = Triangle2d(
-					Vector2::new(
-						middle_x + f64::cos(time) * width / 20.,
-						middle_y + f64::sin(time) * height / 20.,
-					),
-					Vector2::new(middle_x + f64::cos(time) * middle_x, middle_y),
-					Vector2::new(middle_x, middle_y + f64::sin(time) * middle_y),
-				);
-
-				frame.draw_tri(tri, Color::green());
-
-				frame.draw_wireframe_tri(tri, Color::red());
+				self.scene.render_into(&mut frame);
 
 				let mut buffer = surface.buffer_mut().unwrap();
 				let frame_data = frame.get_raw_data();
