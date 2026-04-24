@@ -24,21 +24,36 @@ impl Scene {
 			for (tri, col) in &obj.triangles {
 				let absolute_tri = obj.transform_triangle(*tri);
 				let relative_tri = self.camera.transform_triangle(absolute_tri);
+				if relative_tri.0.z > 0. || relative_tri.1.z > 0. || relative_tri.2.z > 0. {
+					continue;
+				}
 				let projected_tri = self.camera.project_triangle(absolute_tri);
-				let bounds = projected_tri.get_bounds();
-				if bounds.min.x > 1. || bounds.min.y > 1. || bounds.max.x < 0. || bounds.max.y < 0.
+				if projected_tri.0.z < 0.
+					|| projected_tri.0.z > 1.
+					|| projected_tri.1.z < 0.
+					|| projected_tri.1.z > 1.
+					|| projected_tri.2.z <= 0.
+					|| projected_tri.2.z > 1.
+				{
+					continue;
+				}
+				let flat_tri = projected_tri.flatten();
+				let bounds = flat_tri.get_bounds();
+				if bounds.min.x > 1.
+					|| bounds.min.y > 1.
+					|| bounds.max.x < -1.
+					|| bounds.max.y < -1.
 				{
 					continue;
 				}
 				let dist = relative_tri.get_centroid().magnitude();
-				projected_triangles.push((projected_tri, *col, dist));
+				projected_triangles.push((flat_tri, *col, dist));
 			}
 		}
 
 		// Lowest dist will be last in the list
 		projected_triangles.sort_by(|(_, _, lhs), (_, _, rhs)| rhs.total_cmp(lhs));
 
-		std::io::stdout().flush().unwrap();
 		for (tri, col, _) in projected_triangles {
 			let screen_tri = Triangle2d(
 				tri.0 * vector_dimensions,
@@ -48,11 +63,8 @@ impl Scene {
 
 			frame.draw_tri(screen_tri, col);
 		}
-		std::io::stdout().flush().unwrap();
 	}
 }
-
-use std::io::Write;
 
 pub use camera::Camera;
 pub use camera::CameraProjection;

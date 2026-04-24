@@ -29,7 +29,7 @@ impl Frame {
 		if start.x == end.x {
 			let mut i = start.y * (self.width as isize) + start.x;
 			for _y in start.y..=end.y {
-				self.set_pixel_i(i as usize, color);
+				self.set_pixel_i(i as usize, color, 0.);
 
 				// Go down a row
 				i += self.width as isize;
@@ -41,7 +41,7 @@ impl Frame {
 		for y in start.y..=end.y {
 			i = y * (self.width as isize) + start.x;
 			for _x in start.x..=end.x {
-				self.set_pixel_i(i as usize, color);
+				self.set_pixel_i(i as usize, color, 0.);
 				i += 1;
 			}
 		}
@@ -139,7 +139,7 @@ impl Frame {
 			let mut i = 0;
 			let mut self_i = start.y * (self.width as isize) + start.x;
 			for _y in start.y..=end.y {
-				self.set_pixel_i(self_i as usize, frame_data[i]);
+				self.set_pixel_i(self_i as usize, frame_data[i], frame.depth_buffer[i]);
 				i += 1;
 
 				// Go down a row
@@ -153,7 +153,7 @@ impl Frame {
 		for y in start.y..=end.y {
 			self_i = y * (self.width as isize) + start.x;
 			for _x in start.x..=end.x {
-				self.set_pixel_i(self_i as usize, frame_data[i]);
+				self.set_pixel_i(self_i as usize, frame_data[i], frame.depth_buffer[i]);
 				i += 1;
 				self_i += 1;
 			}

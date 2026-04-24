@@ -34,6 +34,11 @@ impl Frame {
 		if bounds.position.x + bounds.dimensions.x >= self.width as isize {
 			bounds.dimensions.x += self.width as isize - (bounds.position.x + bounds.dimensions.x);
 		}
+
+		if bounds.dimensions.x < 0 || bounds.dimensions.y < 0 {
+			return;
+		}
+
 		let mut frame = Frame::new(
 			bounds.dimensions.x.try_into().unwrap(),
 			bounds.dimensions.y.try_into().unwrap(),

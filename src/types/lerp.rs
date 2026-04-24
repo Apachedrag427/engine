@@ -7,8 +7,8 @@ macro_rules! impl_num_lerp {
 	($a:ident, $b:ident) => {
 		impl Lerp<$b> for $a {
 			type Output = $a;
-			fn lerp(&self, rhs: $b, a: f64) -> Self::Output {
-				self + (a * (rhs as $a - self) as f64) as $a
+			fn lerp(&self, rhs: $b, t: f64) -> Self::Output {
+				self + (t * (rhs as $a - self) as f64) as $a
 			}
 		}
 	};

@@ -152,6 +152,11 @@ impl Vector3 {
 	}
 
 	#[inline]
+	pub fn flatten(&self) -> Vector2 {
+		Vector2::new(self.x, self.y)
+	}
+
+	#[inline]
 	pub fn normalize(&self) -> Vector3 {
 		let magnitude = self.magnitude();
 		Vector3 {

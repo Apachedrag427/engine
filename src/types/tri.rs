@@ -105,4 +105,8 @@ impl Triangle3d {
 	pub fn get_centroid(&self) -> Vector3 {
 		(self.0 + self.1 + self.2) / 3.
 	}
+
+	pub fn flatten(&self) -> Triangle2d {
+		Triangle2d(self.0.flatten(), self.1.flatten(), self.2.flatten())
+	}
 }

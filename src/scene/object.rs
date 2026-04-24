@@ -17,6 +17,28 @@ impl Object {
 		}
 	}
 
+	pub fn triangle() -> Object {
+		let mut obj = Object::new();
+		obj.triangles.push((
+			Triangle3d(
+				Vector3::new(-0.5, -0.5, 0.),
+				Vector3::new(0., 0.5, 0.),
+				Vector3::new(0.5, -0.5, 0.),
+			),
+			Color::red(),
+		));
+		obj.triangles.push((
+			Triangle3d(
+				Vector3::new(0.5, -0.5, 0.),
+				Vector3::new(0., 0.5, 0.),
+				Vector3::new(-0.5, -0.5, 0.),
+			),
+			Color::blue(),
+		));
+
+		obj
+	}
+
 	pub fn square() -> Object {
 		let mut obj = Object::new();
 		obj.triangles.push((

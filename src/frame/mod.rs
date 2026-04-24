@@ -4,6 +4,7 @@ pub struct Frame {
 	width: usize,
 	height: usize,
 	data: Vec<Color>,
+	depth_buffer: Vec<f64>,
 }
 
 impl Frame {
@@ -12,6 +13,7 @@ impl Frame {
 			width,
 			height,
 			data: vec![Color::default(); width * height],
+			depth_buffer: vec![0.; width * height],
 		}
 	}
 
@@ -21,21 +23,29 @@ impl Frame {
 	}
 
 	#[inline]
-	pub fn get_pixel(&self, x: usize, y: usize) -> Option<&Color> {
-		self.data.get(y * self.width + x)
+	pub fn get_pixel(&self, x: usize, y: usize) -> Option<(&Color, f64)> {
+		if let Some(pixel) = self.data.get(y * self.width + x) {
+			Some((pixel, self.depth_buffer[y * self.width + x]))
+		} else {
+			None
+		}
 	}
 
 	#[inline]
-	pub fn set_pixel(&mut self, x: usize, y: usize, color: Color) {
+	pub fn set_pixel(&mut self, x: usize, y: usize, color: Color, depth: f64) {
 		if x >= self.width || y >= self.height {
 			return;
 		}
-		self.set_pixel_i(y * self.width + x, color);
+		self.set_pixel_i(y * self.width + x, color, depth);
 	}
 
 	#[inline]
-	pub fn set_pixel_i(&mut self, i: usize, color: Color) {
+	pub fn set_pixel_i(&mut self, i: usize, color: Color, depth: f64) {
 		if i >= self.data.len() {
+			return;
+		}
+
+		if self.depth_buffer[i] > depth {
 			return;
 		}
 
@@ -44,6 +54,7 @@ impl Frame {
 		}
 		if color.a >= 1. {
 			self.data[i] = color;
+			self.depth_buffer[i] = depth;
 			return;
 		}
 

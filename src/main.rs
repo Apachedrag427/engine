@@ -1,24 +1,35 @@
 use engine::frame::Frame;
 use engine::scene::{CameraProjection, Object, Scene};
 use engine::types::{Quat, RotationOrder, Vector2, Vector3};
+use winit::keyboard::{KeyCode, PhysicalKey};
 
 use std::num::NonZeroU32;
 use std::rc::Rc;
 
 use softbuffer::{Context, Surface};
 use winit::application::ApplicationHandler;
-use winit::event::{StartCause, WindowEvent};
+use winit::event::{ElementState, StartCause, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, EventLoop, OwnedDisplayHandle};
 use winit::window::{Window, WindowId};
+
+const PI2: f64 = std::f64::consts::PI * 2.;
 
 fn main() {
 	let mut scene = Scene::new();
 
-	scene.camera.cframe = Vector3::new(0., 0., 5.).into();
-	scene.camera.projection = CameraProjection::Orthographic;
+	scene.camera.cframe = Vector3::new(0., 0., 0.).into();
+	scene.camera.projection = CameraProjection::Perspective;
+	scene.camera.fov = 70.;
 
-	let pyramid = Object::pyramid();
-	scene.objects.push(pyramid);
+	let pyramid_count = 12;
+	for i in 0..pyramid_count {
+		let angle = i as f64 * (PI2 / pyramid_count as f64);
+		let pos = Vector3::new(f64::cos(angle), 0., f64::sin(angle)) * 3.;
+
+		let mut pyramid = Object::pyramid();
+		pyramid.cframe.position = pos;
+		scene.objects.push(pyramid);
+	}
 
 	let event_loop = EventLoop::new().unwrap();
 
@@ -121,9 +132,26 @@ impl ApplicationHandler for App {
 
 				let mut frame = Frame::new(size.width as usize, size.height as usize);
 
-				self.scene.objects[0].cframe.rotation =
-					Quat::from_euler_angles(-0.3, time, 0., RotationOrder::YXZ);
-				self.scene.objects[0].cframe.position = Vector3::y_axis() * f64::sin(time) * 0.1;
+				let mut i = 0;
+				let len = self.scene.objects.len();
+				for obj in &mut self.scene.objects {
+					obj.cframe.rotation = Quat::from_euler_angles(
+						-0.3,
+						time + i as f64 * (PI2 / len as f64),
+						0.,
+						RotationOrder::YXZ,
+					);
+					obj.cframe.position = Vector3::new(
+						obj.cframe.position.x,
+						f64::sin(time) * 0.1,
+						obj.cframe.position.z,
+					);
+					i += 2;
+				}
+
+				self.scene.camera.cframe.rotation =
+					Quat::from_euler_angles(0., time / 2., 0., RotationOrder::YXZ);
+				// self.scene.camera.fov = 70. + f64::cos(time) * 30.;
 
 				self.scene.render_into(&mut frame);
 
@@ -135,6 +163,32 @@ impl ApplicationHandler for App {
 
 				buffer.present().unwrap();
 				surface.window().request_redraw();
+			}
+			WindowEvent::KeyboardInput {
+				device_id: _,
+				event,
+				is_synthetic: _,
+			} => {
+				if event.state == ElementState::Pressed {
+					match event.physical_key {
+						PhysicalKey::Code(KeyCode::KeyP) => {
+							self.scene.camera.projection = match self.scene.camera.projection {
+								CameraProjection::Orthographic => CameraProjection::Perspective,
+								CameraProjection::Perspective => CameraProjection::Orthographic,
+							};
+							println!("{:?}", self.scene.camera.projection);
+						}
+						PhysicalKey::Code(KeyCode::KeyR) => {
+							self.scene.camera.fov += 1.;
+							println!("FOV: {}", self.scene.camera.fov);
+						}
+						PhysicalKey::Code(KeyCode::KeyF) => {
+							self.scene.camera.fov -= 1.;
+							println!("FOV: {}", self.scene.camera.fov);
+						}
+						_ => (),
+					}
+				}
 			}
 			WindowEvent::CloseRequested => {
 				event_loop.exit();
